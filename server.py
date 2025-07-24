@@ -12,22 +12,29 @@ except:
     print("Модель не найдена! Используется заглушка.")
     model = None
 
-@app.route('/calculate', methods=['POST'])
+@app.route('/api/calculate', methods=['POST', 'OPTIONS'])
 def calculate():
-    data = request.json
-    pressure = float(data['pressure'])
-    depth = float(data['depth'])
-    
-    # Пример обработки (замените на вашу модель)
-    if model:
-        result = model.predict([[pressure, depth]])[0]
+    if request.method == 'OPTIONS':
+        # Предварительный CORS-запрос
+        response = jsonify({'status': 'preflight'})
     else:
-        result = pressure * 0.8 + depth * 0.1  # Заглушка
+        # Основной запрос
+        data = request.json
+        pressure = float(data['pressure'])
+        depth = float(data['depth'])
+        result = pressure * 0.8 + depth * 0.1  # Ваш расчет
+        
+        response = jsonify({
+            'result': round(result, 2),
+            'model_used': 'Real Model'
+        })
     
-    return jsonify({
-        'result': round(result, 2),
-        'model_used': 'Real Model' if model else 'Test Formula'
-    })
+    # Добавляем заголовки вручную
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
