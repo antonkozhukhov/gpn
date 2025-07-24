@@ -9,7 +9,7 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
     
     try {
         // Для локального тестирования с Flask-сервером
-        const response = await fetch(' https://shaggy-places-repeat.loca.lt', {
+        const response = await fetch('https://shaggy-places-repeat.loca.lt', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pressure, depth })
