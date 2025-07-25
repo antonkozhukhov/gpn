@@ -1,27 +1,193 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ГПН Анализатор</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Анализ пластовых параметров</h1>
-        <form id="gpnForm">
-            <div class="input-group">
-                <label for="pressure">Пластовое давление (атм):</label>
-                <input type="number" id="pressure" step="0.01" required>
-            </div>
-            <div class="input-group">
-                <label for="depth">Глубина кровли (м):</label>
-                <input type="number" id="depth" step="0.01" required>
-            </div>
-            <button type="submit">Рассчитать</button>
-        </form>
-        <div id="result" class="result-box"></div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+<form id="gpnForm">
+  <h2>Параметры скважины</h2>
+  
+  <div class="form-group">
+    <label for="well_number">Номер скважины:</label>
+    <input type="text" id="well_number" required value="529Н">
+  </div>
+  
+  <div class="form-group">
+    <label for="kill_date">Дата глушения:</label>
+    <input type="date" id="kill_date" required value="2025-07-21">
+  </div>
+  
+  <div class="form-group">
+    <label for="pressure">Рпл (ат) (перед глушением):</label>
+    <input type="number" step="0.1" id="pressure" required value="72">
+  </div>
+  
+  <div class="form-group">
+    <label for="gas_factor">Газовый факт м3/т:</label>
+    <input type="number" step="0.1" id="gas_factor" required value="326">
+  </div>
+  
+  <div class="form-group">
+    <label for="depth">Глубина кровли пласта по вертикале (м):</label>
+    <input type="number" step="0.1" id="depth" required value="1855">
+  </div>
+  
+  <div class="form-group">
+    <label for="density">Расчетная плотность (г/см3):</label>
+    <input type="number" step="0.1" id="density" required value="1">
+  </div>
+  
+  <div class="form-group">
+    <label for="density1">1_ρ г/см3:</label>
+    <input type="number" step="0.1" id="density1" required value="1">
+  </div>
+  
+  <div class="form-group">
+    <label for="density2">2_ρ г/см3:</label>
+    <input type="number" step="0.1" id="density2" required value="1">
+  </div>
+  
+  <div class="form-group">
+    <label for="density3">3_ρ г/см3:</label>
+    <input type="number" step="0.1" id="density3" required value="0">
+  </div>
+  
+  <h3>Дополнительные параметры</h3>
+  
+  <div class="form-group">
+    <label for="well_type">Тип скважины:</label>
+    <select id="well_type" required>
+      <option value="ВЕРТ" selected>ВЕРТ</option>
+      <option value="ГОР">ГОР</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="cluster">Куст:</label>
+    <input type="number" id="cluster" value="0">
+  </div>
+  
+  <div class="form-group">
+    <label for="formation">Пласт:</label>
+    <select id="formation" required>
+      <option value="PVII" selected>PVII</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="se">СЭ:</label>
+    <select id="se" required>
+      <option value="Г/Л" selected>Г/Л</option>
+      <option value="ФОН">ФОН</option>
+      <option value="ЭЦН">ЭЦН</option>
+    </select>
+  </div>
+  
+  <button type="submit">Рассчитать</button>
+</form>
+
+<div id="result"></div>
+
+<style>
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  .error {
+    color: red;
+  }
+</style>
+
+<script>
+document.getElementById('gpnForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Собираем основные параметры
+    const test_kill = {
+        'Номер скважины': document.getElementById('well_number').value,
+        'Дата глушения': document.getElementById('kill_date').value,
+        'Рпл (ат) (перед глушением)': parseFloat(document.getElementById('pressure').value),
+        'Газовый факт м3/т': parseFloat(document.getElementById('gas_factor').value),
+        'Глубина кровли пласта по вертикале (м)': parseFloat(document.getElementById('depth').value),
+        'Расчетная плотность (г/см3)': parseFloat(document.getElementById('density').value),
+        '1_ρ г/см3': parseFloat(document.getElementById('density1').value),
+        '2_ρ г/см3': parseFloat(document.getElementById('density2').value),
+        '3_ρ г/см3': parseFloat(document.getElementById('density3').value)
+    };
+    
+    // Собираем дополнительные параметры
+    const additional_test_kill = {
+        'Тип\nскважины': document.getElementById('well_type').value,
+        'Куст': parseInt(document.getElementById('cluster').value),
+        'Пласт': document.getElementById('formation').value,
+        'СЭ': document.getElementById('se').value
+    };
+    
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '<p>Идет расчет...</p>';
+    
+    try {
+        const response = await fetch('https://will-careful-wichita-visits.trycloudflare.com/api/generate_report', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                test_kill,
+                additional_test_kill
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Отображаем изображение
+            resultDiv.innerHTML = `
+                <h3>Результаты анализа для скважины ${data.well_number}</h3>
+                <p>Дата глушения: ${data.kill_date}</p>
+                <div class="report-image">
+                    <img src="data:image/png;base64,${data.image}" alt="График анализа">
+                </div>
+                <div class="report-text">
+                    <h4>Текстовый отчет:</h4>
+                    <pre>${data.report}</pre>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <p class="error">Ошибка: ${data.message}</p>
+                <p>Проверьте введенные данные и подключение к серверу</p>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <p class="error">Ошибка: ${error.message}</p>
+            <p>Проверьте подключение к серверу</p>
+        `;
+    }
+});
+</script>
