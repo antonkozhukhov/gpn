@@ -294,9 +294,11 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
             resultDiv.innerHTML = `
                 <h3>Результаты анализа для скважины ${data.well_number}</h3>
                 <p class="report-meta">Дата глушения: ${data.kill_date}</p>
+                
                 <div class="report-image">
                     <img src="data:image/png;base64,${data.image}" alt="График анализа">
                 </div>
+
                 <div class="report-text">
                     <h4>Текстовый отчет:</h4>
                     <pre>${data.report}</pre>
