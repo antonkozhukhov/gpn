@@ -5,6 +5,8 @@ let API_BASE_URL;
 try {
   const config = await import('./config.js');
   API_BASE_URL = config.API_BASE_URL;
+  console.log(API_BASE_URL)
+
 } catch {
   API_BASE_URL = 'https://резервный-адрес';
 }
