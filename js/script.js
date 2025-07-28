@@ -1,5 +1,14 @@
 console.log('ghbdtn')
-const API_BASE_URL = window.API_BASE_URL
+
+let API_BASE_URL;
+
+try {
+  const config = await import('./config.js');
+  API_BASE_URL = config.API_BASE_URL;
+} catch {
+  API_BASE_URL = 'https://резервный-адрес';
+}
+
 // Вспомогательная функция для безопасного получения значений
 function getFormValue(id, isNumber = false) {
     const element = document.getElementById(id);
