@@ -7,15 +7,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:  # Добавляем необходимые права
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create config.js
-        run: |
-          echo "export const API_BASE_URL = '${{ secrets.API_URL }}';" > ./js/config.js
+      # Создаем папку js если её нет
+      - name: Create directories
+        run: mkdir -p ./js
 
+      # Генерируем config.js
+      - name: Create config file
+        run: |
+          echo "// Auto-generated config" > ./js/config.js
+          echo "export const API_BASE_URL = '${{ secrets.API_URL }}';" >> ./js/config.js
+          echo "Config file content:"
+          cat ./js/config.js
+
+      # Проверяем структуру файлов (для отладки)
+      - name: Verify files
+        run: |
+          echo "Directory structure:"
+          ls -R
+          echo "Config file:"
+          cat ./js/config.js
+
+      # Деплой через официальный actions/deploy-pages
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+        uses: actions/deploy-pages@v2
