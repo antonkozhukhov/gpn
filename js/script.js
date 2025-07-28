@@ -65,7 +65,7 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
         resultDiv.innerHTML = '<div class="loading">Идет расчет...(1-2 минуты)</div>';
         
         const response = await fetch(`${API_BASE_URL}/api/generate_report`, {
-            method: 'POST',
+            method: 'GET',
             headers: { 
                 'Content-Type': 'application/json',
             },
