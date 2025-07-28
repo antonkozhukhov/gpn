@@ -248,15 +248,5 @@
     }
   }
 </style>
-<script>
-  fetch('/api/config')
-    .then(response => response.json())
-    .then(config => {
-      window.API_BASE_URL = config.API_URL;
-      // Загружаем основной скрипт ПОСЛЕ получения конфига
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = "./js/script.js";
-      document.body.appendChild(script);
-    });
-</script>
+
+<script type="module" src="./js/script.js"></script>
