@@ -291,40 +291,39 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
         const data = await response.json();
         
         if (data.status === 'success') {
-                // Создаем контейнер для результатов
-                resultDiv.innerHTML = `
-                    <h3>Результаты анализа для скважины ${data.well_number}</h3>
-                    <p class="report-meta">Дата глушения: ${data.kill_date}</p>
-                    <div class="report-image" id="imageContainer">
-                        <div class="image-loading">Идет загрузка изображения...</div>
-                    </div>
-                    <div class="report-text">
-                        <h4>Текстовый отчет:</h4>
-                        <pre>${data.report}</pre>
-                    </div>
-                `;
-                
-                // Оптимизированная загрузка изображения
-                const imageContainer = document.getElementById('imageContainer');
-                const cleanBase64 = data.image.replace(/[\s\n]/g, '');
-                
-                // Вариант 1: Пробуем стандартный Base64
-                const img = new Image();
-                img.onload = function() {
-                    imageContainer.innerHTML = '';
-                    imageContainer.appendChild(img);
-                };
-                // img.onerror = function() {
-                //     // Вариант 2: Пробуем альтернативный метод если первый не сработал
-                //     loadImageAlternative(imageContainer, data.image);
-                // };
-                img.src = `data:image/png;base64,${cleanBase64}`;
-                img.alt = "График анализа";
-                img.style.maxWidth = '100%';
-                img.style.height = 'auto';
-                img.style.borderRadius = '6px';
-                img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-            }
+            // Создаем контейнер для результатов
+            resultDiv.innerHTML = `
+                <h3>Результаты анализа для скважины ${data.well_number}</h3>
+                <p class="report-meta">Дата глушения: ${data.kill_date}</p>
+                <div class="report-image" id="imageContainer">
+                    <div class="image-loading">Идет загрузка изображения...</div>
+                </div>
+                <div class="report-text">
+                    <h4>Текстовый отчет:</h4>
+                    <pre>${data.report}</pre>
+                </div>
+            `;
+            
+            // Загрузка изображения через URL
+            const imageContainer = document.getElementById('imageContainer');
+            const img = new Image();
+            
+            img.onload = function() {
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(img);
+            };
+            
+            img.onerror = function() {
+                imageContainer.innerHTML = '<div class="error">Ошибка загрузки изображения</div>';
+            };
+            
+            img.src = data.image_url; // Используем URL вместо base64
+            img.alt = "График анализа";
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.borderRadius = '6px';
+            img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        }
         else {
             resultDiv.innerHTML = `
                 <div class="error">Ошибка: ${data.message}</div>
