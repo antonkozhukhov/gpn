@@ -250,6 +250,7 @@
 </style>
 
 <script>
+import { API_BASE_URL } from './config';
 document.getElementById('gpnForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -277,7 +278,7 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
     resultDiv.innerHTML = '<div class="loading">Идет расчет...(1-2 минуты)</div>';
     
     try {
-        const response = await fetch('https://equally-flights-informational-directors.trycloudflare.com/api/generate_report', {
+        const response = await fetch(`${API_BASE_URL}/api/generate_report`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
