@@ -1,6 +1,5 @@
 console.log('ghbdtn')
-import { API_BASE_URL } from './config.js';
-
+const API_BASE_URL = window.API_BASE_URL
 // Вспомогательная функция для безопасного получения значений
 function getFormValue(id, isNumber = false) {
     const element = document.getElementById(id);
