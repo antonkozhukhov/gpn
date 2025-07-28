@@ -1,31 +1,59 @@
+console.log('ghbdtn')
 import { API_BASE_URL } from './config.js';
+
+// Вспомогательная функция для безопасного получения значений
+function getFormValue(id, isNumber = false) {
+    const element = document.getElementById(id);
+    if (!element) return null;
+    
+    const value = element.value.trim();
+    if (isNumber) {
+        const numValue = parseFloat(value);
+        return isNaN(numValue) ? null : numValue;
+    }
+    return value;
+}
+
 document.getElementById('gpnForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Собираем данные формы
+    // Валидация обязательных полей
+    const requiredFields = ['well_number', 'kill_date', 'pressure', 'gas_factor', 'depth', 'density'];
+    for (const fieldId of requiredFields) {
+        if (!getFormValue(fieldId)) {
+            showError(`Поле "${document.getElementById(fieldId).previousElementSibling.textContent}" обязательно для заполнения`);
+            return;
+        }
+    }
+
+    // Собираем данные формы с валидацией
     const test_kill = {
-        'Номер скважины': document.getElementById('well_number').value,
-        'Дата глушения': document.getElementById('kill_date').value,
-        'Рпл (ат) (перед глушением)': parseFloat(document.getElementById('pressure').value),
-        'Газовый факт м3/т': parseFloat(document.getElementById('gas_factor').value),
-        'Глубина кровли пласта по вертикале (м)': parseFloat(document.getElementById('depth').value),
-        'Расчетная плотность (г/см3)': parseFloat(document.getElementById('density').value),
-        '1_ρ г/см3': parseFloat(document.getElementById('density1').value),
-        '2_ρ г/см3': parseFloat(document.getElementById('density2').value),
-        '3_ρ г/см3': parseFloat(document.getElementById('density3').value)
+        'Номер скважины': getFormValue('well_number'),
+        'Дата глушения': getFormValue('kill_date'),
+        'Рпл (ат) (перед глушением)': getFormValue('pressure', true),
+        'Газовый факт м3/т': getFormValue('gas_factor', true),
+        'Глубина кровли пласта по вертикале (м)': getFormValue('depth', true),
+        'Расчетная плотность (г/см3)': getFormValue('density', true),
+        '1_ρ г/см3': getFormValue('density1', true) || 0,
+        '2_ρ г/см3': getFormValue('density2', true) || 0,
+        '3_ρ г/см3': getFormValue('density3', true) || 0
     };
     
     const additional_test_kill = {
-        'Тип\nскважины': document.getElementById('well_type').value,
-        'Куст': parseInt(document.getElementById('cluster').value),
-        'Пласт': document.getElementById('formation').value,
-        'СЭ': document.getElementById('se').value
+        'Тип скважины': getFormValue('well_type'),
+        'Куст': getFormValue('cluster', true) || 0,
+        'Пласт': getFormValue('formation'),
+        'СЭ': getFormValue('se')
     };
     
     const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = '<div class="loading">Идет расчет...(1-2 минуты)</div>';
-    console.log(API_BASE_URL);
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    
     try {
+        // Показываем индикатор загрузки
+        submitButton.disabled = true;
+        resultDiv.innerHTML = '<div class="loading">Идет расчет...(1-2 минуты)</div>';
+        
         const response = await fetch(`${API_BASE_URL}/api/generate_report`, {
             method: 'POST',
             headers: { 
@@ -37,52 +65,80 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
             })
         });
         
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Ошибка сервера: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.status === 'success') {
-            // Создаем контейнер для результатов
-            resultDiv.innerHTML = `
-                <h3>Результаты анализа для скважины ${data.well_number}</h3>
-                <p class="report-meta">Дата глушения: ${data.kill_date}</p>
-                <div class="report-image" id="imageContainer">
-                    <div class="image-loading">Идет загрузка изображения...</div>
-                </div>
-                <div class="report-text">
-                    <h4>Текстовый отчет:</h4>
-                    <pre>${data.report}</pre>
-                </div>
-            `;
-            
-            // Загрузка изображения через URL
-            const imageContainer = document.getElementById('imageContainer');
-            const img = new Image();
-            
-            img.onload = function() {
-                imageContainer.innerHTML = '';
-                imageContainer.appendChild(img);
-            };
-            
-            img.onerror = function() {
-                imageContainer.innerHTML = '<div class="error">Ошибка загрузки изображения</div>';
-            };
-            
-            img.src = data.image_url; // Используем URL вместо base64
-            img.alt = "График анализа";
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
-            img.style.borderRadius = '6px';
-            img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-        }
-        else {
-            resultDiv.innerHTML = `
-                <div class="error">Ошибка: ${data.message}</div>
-                <p>Проверьте введенные данные и подключение к серверу</p>
-            `;
+            showResults(data);
+        } else {
+            throw new Error(data.message || 'Неизвестная ошибка сервера');
         }
     } catch (error) {
-        resultDiv.innerHTML = `
-            <div class="error">Ошибка: ${error.message}</div>
-            <p>Проверьте подключение к серверу</p>
-        `;
+        showError(error.message);
+    } finally {
+        submitButton.disabled = false;
     }
 });
+
+function showResults(data) {
+    const resultDiv = document.getElementById('result');
+    
+    resultDiv.innerHTML = `
+        <h3>Результаты анализа для скважины ${escapeHtml(data.well_number)}</h3>
+        <p class="report-meta">Дата глушения: ${escapeHtml(data.kill_date)}</p>
+        <div class="report-image" id="imageContainer">
+            <div class="image-loading">Идет загрузка изображения...</div>
+        </div>
+        <div class="report-text">
+            <h4>Текстовый отчет:</h4>
+            <pre>${escapeHtml(data.report)}</pre>
+        </div>
+    `;
+    
+    if (data.image_url) {
+        loadImage(data.image_url);
+    }
+}
+
+function loadImage(url) {
+    const imageContainer = document.getElementById('imageContainer');
+    const img = new Image();
+    
+    img.onload = function() {
+        imageContainer.innerHTML = '';
+        imageContainer.appendChild(img);
+    };
+    
+    img.onerror = function() {
+        imageContainer.innerHTML = '<div class="error">Ошибка загрузки изображения</div>';
+    };
+    
+    img.src = url;
+    img.alt = "График анализа";
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    img.style.borderRadius = '6px';
+    img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+}
+
+function showError(message) {
+    document.getElementById('result').innerHTML = `
+        <div class="error">Ошибка: ${escapeHtml(message)}</div>
+        <p>Проверьте введенные данные и подключение к серверу</p>
+    `;
+}
+
+// Защита от XSS
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return unsafe;
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
