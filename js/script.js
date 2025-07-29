@@ -50,7 +50,7 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
     };
     
     const additional_test_kill = {
-        'Тип скважины': getFormValue('well_type'),
+        'Тип\nскважины': getFormValue('well_type'),
         'Куст': getFormValue('cluster', true) || 0,
         'Пласт': getFormValue('formation'),
         'СЭ': getFormValue('se')
