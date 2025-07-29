@@ -187,3 +187,63 @@ function escapeHtml(unsafe) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Получаем все числовые поля
+  const numericInputs = document.querySelectorAll('.numeric-input');
+  
+  // Для каждого поля добавляем обработчик событий
+  numericInputs.forEach(input => {
+    // Проверка при изменении значения
+    input.addEventListener('input', validateNumberInput);
+    // Проверка при потере фокуса
+    input.addEventListener('blur', validateNumberInput);
+    // Проверка при загрузке страницы
+    validateNumberInput({ target: input });
+  });
+  
+  // Функция валидации
+  function validateNumberInput(event) {
+    const input = event.target;
+    const messageElement = input.nextElementSibling;
+    
+    // Проверяем, является ли значение числом
+    if (isNaN(input.valueAsNumber) || input.value === '') {
+      input.classList.add('invalid');
+      messageElement.textContent = 'Введите число';
+      return false;
+    }
+    
+    // Проверяем минимальное значение (0 для большинства полей)
+    const minValue = input.id === 'pressure' ? 0 : 0; // Можно настроить индивидуально
+    if (input.valueAsNumber < minValue) {
+      input.classList.add('invalid');
+      messageElement.textContent = `Значение не может быть меньше ${minValue}`;
+      return false;
+    }
+    
+   
+    
+    // Если все проверки пройдены
+    input.classList.remove('invalid');
+    messageElement.textContent = '';
+    return true;
+  }
+  
+  // Модифицируем вашу функцию getFormValue для использования валидации
+  function getFormValue(id, isNumber = false) {
+    const element = document.getElementById(id);
+    if (!element) return null;
+    
+    // Вызываем валидацию перед получением значения
+    const isValid = validateNumberInput({ target: element });
+    if (!isValid && isNumber) return null;
+    
+    const value = element.value.trim();
+    if (isNumber) {
+      const numValue = parseFloat(value);
+      return isNaN(numValue) ? null : numValue;
+    }
+    return value;
+  }
+});
