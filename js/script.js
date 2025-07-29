@@ -53,7 +53,10 @@ document.getElementById('gpnForm').addEventListener('submit', async function(e) 
         'Тип\nскважины': getFormValue('well_type'),
         'Куст': getFormValue('cluster', true) || 0,
         'Пласт': getFormValue('formation'),
-        'СЭ': getFormValue('se')
+        'СЭ': getFormValue('se'),
+        'Объем МСКО': getFormValue('msko_volume', true),
+        'Концентрация МСКО': getFormValue('msko_density', true),
+        'Сложность'  :getFormValue('kill_complexity')
     };
     
     const resultDiv = document.getElementById('result');
