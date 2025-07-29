@@ -104,7 +104,7 @@ function showResults(data) {
             <div class="image-loading">Идет загрузка изображения...</div>
         </div>
         <div class="report-text">
-            <h4>Текстовый отчет:</h4>
+            <!-- <h4>Текстовый отчет:</h4>  -->
             <pre>${escapeHtml(data.report)}</pre>
         </div>
     `;
