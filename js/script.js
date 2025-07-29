@@ -101,6 +101,9 @@ function showResults(data) {
     const resultDiv = document.getElementById('result');
     
     resultDiv.innerHTML = `
+        <div class="download-section" id="downloadSection">
+            <button id="downloadReportBtn" class="download-btn">Скачать отчет (ZIP)</button>
+        </div>
         <h3>Результаты анализа для скважины ${escapeHtml(data.well_number)}</h3>
         <p class="report-meta">Дата глушения: ${escapeHtml(data.kill_date)}</p>
         <div class="report-image" id="imageContainer">
@@ -109,9 +112,7 @@ function showResults(data) {
         <div class="report-text">
             <pre>${escapeHtml(data.report)}</pre>
         </div>
-        <div class="download-section" id="downloadSection">
-            <button id="downloadReportBtn" class="download-btn">Скачать отчет (ZIP)</button>
-        </div>
+        
     `;
     
     // Добавляем обработчик для кнопки скачивания
