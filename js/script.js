@@ -1,6 +1,5 @@
 console.log('ghbdtn')
-import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.esm.min.js';
-
+const zip = new JSZip();
 let API_BASE_URL;
 
 try {
