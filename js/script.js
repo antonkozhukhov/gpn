@@ -109,9 +109,41 @@ function showResults(data) {
         </div>
     `;
     
-    if (data.image_url) {
+    // Проверяем наличие Base64 данных изображения
+    if (data.image) {
+        loadImageFromBase64(data.image);
+    }
+    // Если Base64 нет, но есть URL (для обратной совместимости)
+    else if (data.image_url) {
         loadImage(data.image_url);
     }
+}
+
+function loadImageFromBase64(base64String) {
+    const imageContainer = document.getElementById('imageContainer');
+    const img = new Image();
+    
+    img.onload = function() {
+        imageContainer.innerHTML = '';
+        imageContainer.appendChild(img);
+    };
+    
+    img.onerror = function() {
+        imageContainer.innerHTML = '<div class="error">Ошибка загрузки изображения</div>';
+    };
+    
+    // Убедитесь, что base64String включает правильный префикс (например, 'data:image/png;base64,')
+    if (!base64String.startsWith('data:')) {
+        // Добавляем стандартный префикс для PNG (можете изменить на нужный вам формат)
+        base64String = `data:image/png;base64,${base64String}`;
+    }
+    
+    img.src = base64String;
+    img.alt = "График анализа";
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    img.style.borderRadius = '6px';
+    img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
 }
 
 function loadImage(url) {
