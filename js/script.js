@@ -1,4 +1,6 @@
 console.log('ghbdtn')
+import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+
 
 let API_BASE_URL;
 
@@ -107,10 +109,17 @@ function showResults(data) {
             <div class="image-loading">Идет загрузка изображения...</div>
         </div>
         <div class="report-text">
-            <!-- <h4>Текстовый отчет:</h4>  -->
             <pre>${escapeHtml(data.report)}</pre>
         </div>
+        <div class="download-section" id="downloadSection">
+            <button id="downloadReportBtn" class="download-btn">Скачать отчет (ZIP)</button>
+        </div>
     `;
+    
+    // Добавляем обработчик для кнопки скачивания
+    document.getElementById('downloadReportBtn').addEventListener('click', () => {
+        downloadReport(data);
+    });
     
     // Проверяем наличие Base64 данных изображения
     if (data.image) {
@@ -119,6 +128,58 @@ function showResults(data) {
     // Если Base64 нет, но есть URL (для обратной совместимости)
     else if (data.image_url) {
         loadImage(data.image_url);
+    }
+}
+
+async function downloadReport(data) {
+    try {
+        const downloadBtn = document.getElementById('downloadReportBtn');
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = 'Подготовка архива...';
+        
+        // Создаем ZIP архив
+        const zip = new JSZip();
+        
+        // Добавляем текстовый отчет
+        const reportFilename = `Отчет_${data.well_number}_${data.kill_date}.txt`;
+        zip.file(reportFilename, data.report);
+        
+        // Добавляем изображение (если есть)
+        if (data.image) {
+            // Удаляем префикс base64 если он есть
+            const base64Data = data.image.startsWith('data:') 
+                ? data.image.split(',')[1] 
+                : data.image;
+            
+            const imgFilename = `График_${data.well_number}_${data.kill_date}.png`;
+            zip.file(imgFilename, base64Data, { base64: true });
+        }
+        
+        // Генерируем архив
+        const content = await zip.generateAsync({ type: 'blob' });
+        
+        // Создаем ссылку для скачивания
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Отчет_${data.well_number}_${data.kill_date}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Очистка
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = 'Скачать отчет (ZIP)';
+        }, 100);
+        
+    } catch (error) {
+        console.error('Ошибка при создании архива:', error);
+        alert('Не удалось создать архив отчета');
+        const downloadBtn = document.getElementById('downloadReportBtn');
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = 'Скачать отчет (ZIP)';
     }
 }
 
