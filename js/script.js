@@ -4,8 +4,8 @@ let API_BASE_URL;
 
 try {
   const config = await import('./config.js');
-//   API_BASE_URL = config.API_BASE_URL;
-  API_BASE_URL = 'https://influence-config-reseller-requiring.trycloudflare.com'
+  API_BASE_URL = config.API_BASE_URL;
+//   API_BASE_URL = 'https://influence-config-reseller-requiring.trycloudflare.com'
   console.log(API_BASE_URL)
 
 } catch {
