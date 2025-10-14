@@ -5,11 +5,11 @@ let API_BASE_URL;
 try {
   const config = await import('./config.js');
   //API_BASE_URL = config.API_BASE_URL;
-  API_BASE_URL = 'https://privileges-apparent-effective-editor.trycloudflare.com';
+  API_BASE_URL = 'https://pay-burns-minute-hanging.trycloudflare.com';
   console.log(API_BASE_URL)
 
 } catch {
-  API_BASE_URL = 'https://privileges-apparent-effective-editor.trycloudflare.com';
+  API_BASE_URL = 'https://pay-burns-minute-hanging.trycloudflare.com';
 }
 
 // Вспомогательная функция для безопасного получения значений
