@@ -5,11 +5,11 @@ let API_BASE_URL;
 try {
   const config = await import('./config.js');
   //API_BASE_URL = config.API_BASE_URL;
-  API_BASE_URL = 'https://0dec8a0f7e13ce8bd9e60f9cccc879ee.serveo.net';
+  API_BASE_URL = 'https://diff-disposal-assessing-maintains.trycloudflare.com';
   console.log(API_BASE_URL)
 
 } catch {
-  API_BASE_URL = 'https://0dec8a0f7e13ce8bd9e60f9cccc879ee.serveo.net';
+  API_BASE_URL = 'https://diff-disposal-assessing-maintains.trycloudflare.com';
 }
 
 // Вспомогательная функция для безопасного получения значений
